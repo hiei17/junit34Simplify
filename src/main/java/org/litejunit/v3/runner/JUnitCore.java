@@ -33,10 +33,9 @@ public class JUnitCore {
     public static void  runClass(Class<?> clz){
     	try {
     		//里面有个TestClassMethodsRunner
-			TestClassRunner runner = new TestClassRunner(clz);
 			JUnitCore core = new JUnitCore();
 			core.addListener(new TextListener());		//监听是用于各个阶段打印控制台的
-			Result result = core.run(runner);//TODO 核心 里面本质上是交给TestClassRunner运行
+			Result result = core.run(new TestClassRunner(clz));//TODO 核心 里面本质上是交给TestClassRunner运行
 			
 		} catch (InitializationError e) {
 			
@@ -55,7 +54,10 @@ public class JUnitCore {
 		
 		try {
 			notifier.fireTestRunStarted(runner.getDescription());
+
+			//TestClassRunner
 			runner.run(notifier);//todo
+
 			notifier.fireTestRunFinished(result);
 		} finally {
 			removeListener(listener);

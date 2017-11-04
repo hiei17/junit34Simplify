@@ -26,14 +26,14 @@ public class TestMethodRunner extends BeforeAndAfterRunner {
 	}
 
 	public void run() {
-		//@Before
-		notifier.fireTestStarted(description);//运行前
+
+		notifier.fireTestStarted(description);//运行前 监听
 		try {
-			//反射执行@test的方法
+			//todo 里面包含 before after
 			runProtected();
 		} finally {
 			//@After
-			notifier.fireTestFinished(description);//运行后
+			notifier.fireTestFinished(description);//运行后 监听
 		}
 	}
 

@@ -11,33 +11,39 @@ public abstract class BeforeAndAfterRunner {
 		private static final long serialVersionUID= 1L;
 	}
 
+	//注解是哪个 是子类实现的构造方法里面穿的
 	private final Class<? extends Annotation> beforeAnnotation;
-
 	private final Class<? extends Annotation> afterAnnotation;
 
+	//指定注解方法查找器
 	private TestIntrospector testIntrospector;
 
+	//测试类
 	private Object test;
 
 	public BeforeAndAfterRunner(Class<?> testClass,
 			Class<? extends Annotation> beforeAnnotation,
 			Class<? extends Annotation> afterAnnotation, 
 			Object test) {
+
 		this.beforeAnnotation= beforeAnnotation;
 		this.afterAnnotation= afterAnnotation;
 		this.testIntrospector= new TestIntrospector(testClass);
 		this.test= test;
 	}
 
+	//TestMethodRunner 或者 TestClassRunner 的 run()里面调用
 	public void runProtected() {
 		try {
-			//@before 方法
+			//@BeforeClass //@Before
 			runBefores();
-			//主体方法 留给子类实现
+
+			//todo 主体方法 留给子类实现
 			runUnprotected();
 		} catch (FailedBefore e) {
 			;
 		} finally {
+			//@AfterClass ////@After
 			runAfters();
 		}
 	}
@@ -50,8 +56,9 @@ public abstract class BeforeAndAfterRunner {
 	private void runBefores() throws FailedBefore {
 		try {
 			List<Method> befores= testIntrospector.getTestMethods(beforeAnnotation);
-			for (Method before : befores)
+			for (Method before : befores) {
 				invokeMethod(before);
+			}
 		} catch (InvocationTargetException e) {
 			addFailure(e.getTargetException());
 			throw new FailedBefore();
