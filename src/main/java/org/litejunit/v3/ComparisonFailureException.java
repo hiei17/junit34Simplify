@@ -2,12 +2,12 @@ package org.litejunit.v3;
 
 /**
  * Thrown when an assertEquals(String, String) fails. Create and throw
- * a <code>ComparisonFailure</code> manually if you want to show users the difference between two complex 
+ * a <code>ComparisonFailureException</code> manually if you want to show users the difference between two complex
  * strings.
  * 
  * Inspired by a patch from Alex Chaffee (alex@purpletech.com)
  */
-public class ComparisonFailure extends AssertionError {	
+public class ComparisonFailureException extends AssertionError {
 	private static final int MAX_CONTEXT_LENGTH= 20;
 	private static final long serialVersionUID= 1L;
 	
@@ -20,7 +20,7 @@ public class ComparisonFailure extends AssertionError {
 	 * @param expected the expected string value
 	 * @param actual the actual string value
 	 */
-	public ComparisonFailure (String message, String expected, String actual) {
+	public ComparisonFailureException(String message, String expected, String actual) {
 		super (message);
 		fExpected= expected;
 		fActual= actual;
@@ -37,20 +37,7 @@ public class ComparisonFailure extends AssertionError {
 		return new ComparisonCompactor(MAX_CONTEXT_LENGTH, fExpected, fActual).compact(super.getMessage());
 	}
 	
-	/**
-	 * Returns the actual value
-	 * @return the actual string value
-	 */
-	public String getActual() {
-		return fActual;
-	}
-	/**
-	 * Returns the expected value
-	 * @return the expected string value
-	 */
-	public String getExpected() {
-		return fExpected;
-	}
+
 	
 	private static class ComparisonCompactor {
 		private static final String ELLIPSIS= "...";

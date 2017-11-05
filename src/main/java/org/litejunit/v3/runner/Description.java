@@ -80,12 +80,7 @@ public class Description {
 		return fChildren;
 	}
 
-	/**
-	 * @return true if the receiver is a suite
-	 */
-	public boolean isSuite() {
-		return !isTest();
-	}
+
 
 	/**
 	 * @return true if the receiver is an atomic test
@@ -94,17 +89,7 @@ public class Description {
 		return getChildren().isEmpty();
 	}
 
-	/**
-	 * @return the total number of atomic tests in the receiver
-	 */
-	public int testCount() {
-		if (isTest())
-			return 1;
-		int result= 0;
-		for (Description child : getChildren())
-			result+= child.testCount();
-		return result;
-	}
+
 
 	@Override
 	public int hashCode() {

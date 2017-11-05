@@ -1,8 +1,7 @@
 package org.litejunit.v3.runner;
 
-import org.litejunit.v3.notification.RunListener;
+import org.litejunit.v3.notification.AbstractRunListener;
 import org.litejunit.v3.notification.RunNotifier;
-import org.litejunit.v3.runners.InitializationError;
 import org.litejunit.v3.runners.TestClassRunner;
 import org.litejunit.v3.runners.TextListener;
 
@@ -21,23 +20,20 @@ import org.litejunit.v3.runners.TextListener;
  */
 public class JUnitCore {
 	//对listener的进一步抽象
-	private RunNotifier notifier;
+	private RunNotifier notifier=new RunNotifier();
 
-	/**
-	 * Create a new <code>JUnitCore</code> to run tests.
-	 */
-	public JUnitCore() {
-		notifier= new RunNotifier();
-	}
-
+	//用这个静态方法开始
     public static void  runClass(Class<?> clz){
     	try {
-    		//里面有个TestClassMethodsRunner
-			JUnitCore core = new JUnitCore();
-			core.addListener(new TextListener());		//监听是用于各个阶段打印控制台的
-			Result result = core.run(new TestClassRunner(clz));//TODO 核心 里面本质上是交给TestClassRunner运行
-			
-		} catch (InitializationError e) {
+
+			JUnitCore core = new JUnitCore();//本类
+
+			core.notifier.addListener(new TextListener());
+
+			//TODO 核心 里面本质上是交给TestClassRunner运行
+			Result result = core.run(new TestClassRunner(clz));//TestClassRunner里面包了一个TestClassMethodsRunner
+
+		} catch (Exception e) {
 			
 			e.printStackTrace();
 		}
@@ -45,15 +41,22 @@ public class JUnitCore {
     }
 
 	/**
-	 * Do not use. Testing purposes only.
+	 * 真的运行
+	 * @param runner TestClassRunner
+	 * @return 运行结果类
 	 */
 	public Result run(Runner runner) {
+    	//总结测试结果的类
 		Result result= new Result();
-		RunListener listener= result.createListener();//一个内置的监听
-		addListener(listener);
-		
+
+		AbstractRunListener listener= result.createListener();//Result内部类 一个内置的监听
+
+		notifier.addListener(listener);
+
 		try {
-			notifier.fireTestRunStarted(runner.getDescription());
+			//辗转调用TestClassMethodsRunner.methodDescription 得到整理过的测试类信息
+			Description description = runner.getDescription();
+			notifier.fireTestRunStarted(description);//通知所有签字监听器 具体干啥看它们自己
 
 			//TestClassRunner
 			runner.run(notifier);//todo
@@ -64,21 +67,12 @@ public class JUnitCore {
 		}
 		return result;
 	}
-	
-	/**
-	 * Add a listener to be notified as the tests run.
-	 * @param listener the listener
-	 * @see org.junit.runner.notification.RunListener
-	 */
-	public void addListener(RunListener listener) {
-		notifier.addListener(listener);
-	}
 
 	/**
 	 * Remove a listener.
 	 * @param listener the listener to remove
 	 */
-	public void removeListener(RunListener listener) {
+	public void removeListener(AbstractRunListener listener) {
 		notifier.removeListener(listener);
 	}
 }

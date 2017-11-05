@@ -16,56 +16,66 @@ import java.util.List;
  * move <code>fireTestRunStarted()</code> and <code>fireTestRunFinished()</code>
  * to a separate class since they should only be called once per run.
  */
+//管理所有监听器的 JUnitCore里面包含了一个
 public class RunNotifier {
-	private List<RunListener> fListeners= new ArrayList<RunListener>();
-	private boolean fPleaseStop= false;
-	
+	private List<AbstractRunListener> fListeners= new ArrayList<AbstractRunListener>();
+
 	/** Internal use only
 	 */
-	public void addListener(RunListener listener) {
+	public void addListener(AbstractRunListener listener) {
 		fListeners.add(listener);
 	}
 
 	/** Internal use only
 	 */
-	public void removeListener(RunListener listener) {
+	public void removeListener(AbstractRunListener listener) {
 		fListeners.remove(listener);
 	}
 
-	private abstract class SafeNotifier {
+	//内部抽象类 模板
+	private abstract class AbstractSafeNotifier {
 		void run() {
-			for (Iterator<RunListener> all= fListeners.iterator(); all.hasNext();) {
+			for (Iterator<AbstractRunListener> allListeners = fListeners.iterator(); allListeners.hasNext();) {
+
 				try {
-					notifyListener(all.next());
+					//关键
+					notifyListener(allListeners.next());
 				} catch (Exception e) {
-					all.remove(); // Remove the offending listener first to avoid an infinite loop
+					// Remove the offending listener first to avoid an infinite loop
+					allListeners.remove();
+
 					fireTestFailure(new Failure(Description.TEST_MECHANISM, e));
 				}
+
 			}
 		}
-		
-		abstract protected void notifyListener(RunListener each) throws Exception;
+		//等子类自由实现
+		abstract protected void notifyListener(AbstractRunListener each) throws Exception;
 	}
 	
-	/**
-	 * Do not invoke. 
-	 */
+
 	public void fireTestRunStarted(final Description description) {
-		new SafeNotifier() {
+		//这个抽象类 只是用来遍历每个监听器的
+		new AbstractSafeNotifier() {
+			/**
+			 *监听器具体干啥
+			 * @param listener 目前只有 Result.Listener 内部类 和 TextListener
+			 */
 			@Override
-			protected void notifyListener(RunListener each) throws Exception {
-				each.testRunStarted(description);
+			protected void notifyListener(AbstractRunListener listener) throws Exception {
+				//Result里面只记录下时间  TextListener没有重写这个方法 空的
+				listener.testRunStarted(description);
 			};
-		}.run();
+		}.run();//里面会每个监听器调用notifyListener
 	}
 	
 	/**
 	 * Do not invoke.
 	 */
 	public void fireTestRunFinished(final Result result) {
-		new SafeNotifier() {
+		new AbstractSafeNotifier() {
 			@Override
-			protected void notifyListener(RunListener each) throws Exception {
+			protected void notifyListener(AbstractRunListener each) throws Exception {
 				each.testRunFinished(result);
 			};
 		}.run();
@@ -77,11 +87,13 @@ public class RunNotifier {
 	 * @throws StoppedByUserException thrown if a user has requested that the test run stop
 	 */
 	public void fireTestStarted(final Description description) throws StoppedByUserException {
-		if (fPleaseStop)
+		boolean fPleaseStop = false;
+		if (fPleaseStop) {
 			throw new StoppedByUserException();
-		new SafeNotifier() {
+		}
+		new AbstractSafeNotifier() {
 			@Override
-			protected void notifyListener(RunListener each) throws Exception {
+			protected void notifyListener(AbstractRunListener each) throws Exception {
 				each.testStarted(description);
 			};
 		}.run();
@@ -92,10 +104,10 @@ public class RunNotifier {
 	 * @param failure the description of the test that failed and the exception thrown
 	 */
 	public void fireTestFailure(final Failure failure) {
-		new SafeNotifier() {
+		new AbstractSafeNotifier() {
 			@Override
-			protected void notifyListener(RunListener each) throws Exception {
-				each.testFailure(failure);
+			protected void notifyListener(AbstractRunListener listener) throws Exception {
+				listener.testFailure(failure);
 			};
 		}.run();
 	}
@@ -107,9 +119,9 @@ public class RunNotifier {
 	 * @param description the description of the test that finished
 	 */
 	public void fireTestFinished(final Description description) {
-		new SafeNotifier() {
+		new AbstractSafeNotifier() {
 			@Override
-			protected void notifyListener(RunListener each) throws Exception {
+			protected void notifyListener(AbstractRunListener each) throws Exception {
 				each.testFinished(description);
 			};
 		}.run();

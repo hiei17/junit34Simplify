@@ -29,8 +29,8 @@ public class TestMethodRunner extends BeforeAndAfterRunner {
 
 		notifier.fireTestStarted(description);//运行前 监听
 		try {
-			//todo 里面包含 before after
-			runProtected();
+			//父类BeforeAndAfterRunner的方法 里面包含 before after
+			runProtected();//里面主要调用本类复写的runUnprotected
 		} finally {
 			//@After
 			notifier.fireTestFinished(description);//运行后 监听
@@ -38,6 +38,7 @@ public class TestMethodRunner extends BeforeAndAfterRunner {
 	}
 
 
+	//重写运行主体 执行本@test方法
 	@Override
 	protected void runUnprotected() {
 		try {
@@ -51,6 +52,7 @@ public class TestMethodRunner extends BeforeAndAfterRunner {
 		}
 	}
 
+	//重写失败怎么处理
 	@Override
 	protected void addFailure(Throwable e) {
 		notifier.fireTestFailure(new Failure(description, e));

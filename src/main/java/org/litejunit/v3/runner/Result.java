@@ -1,7 +1,7 @@
 package org.litejunit.v3.runner;
 
 import org.litejunit.v3.notification.Failure;
-import org.litejunit.v3.notification.RunListener;
+import org.litejunit.v3.notification.AbstractRunListener;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,7 +14,6 @@ import java.util.List;
  */
 public class Result {
 	private int fCount= 0;
-	private int fIgnoreCount= 0;
 	private List<Failure> fFailures= new ArrayList<Failure>();
 	private long fRunTime= 0;
 	private long fStartTime;
@@ -54,7 +53,8 @@ public class Result {
 		return getFailureCount() == 0;
 	}
 
-	private class Listener extends RunListener {
+	//内部类 用于记录结果的监听器
+	private class Listener extends AbstractRunListener {
 		@Override
 		public void testRunStarted(Description description) throws Exception {
 			fStartTime= System.currentTimeMillis();
@@ -72,20 +72,20 @@ public class Result {
 		}
 
 		@Override
+		public void testFinished(Description description) throws Exception {}
+
+		@Override
 		public void testFailure(Failure failure) throws Exception {
 			fFailures.add(failure);
 		}
 
-		@Override
-		public void testIgnored(Description description) throws Exception {
-			fIgnoreCount++;
-		}
+
 	}
 
 	/**
 	 * Internal use only.
 	 */
-	public RunListener createListener() {
+	public AbstractRunListener createListener() {
 		return new Listener();
 	}
 }

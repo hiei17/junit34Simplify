@@ -75,7 +75,7 @@ public class Assert {
 		if (expected != null && expected.equals(actual))
 			return;
 		if (expected instanceof String && actual instanceof String)
-			throw new ComparisonFailure(message, (String)expected, (String)actual);
+			throw new ComparisonFailureException(message, (String)expected, (String)actual);
 		else
 			failNotEquals(message, expected, actual);
 	}

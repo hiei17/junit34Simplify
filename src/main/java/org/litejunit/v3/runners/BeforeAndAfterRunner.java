@@ -7,6 +7,7 @@ import java.util.List;
 
 public abstract class BeforeAndAfterRunner {
 
+	//异常类就用个名字
 	private static class FailedBefore extends Exception {
 		private static final long serialVersionUID= 1L;
 	}
@@ -48,8 +49,8 @@ public abstract class BeforeAndAfterRunner {
 		}
 	}
 
+	//得子类实现
 	protected abstract void runUnprotected();
-
 	protected abstract void addFailure(Throwable targetException);
 
 	// Stop after first failed @Before
@@ -57,7 +58,7 @@ public abstract class BeforeAndAfterRunner {
 		try {
 			List<Method> befores= testIntrospector.getTestMethods(beforeAnnotation);
 			for (Method before : befores) {
-				invokeMethod(before);
+				before.invoke(test);
 			}
 		} catch (InvocationTargetException e) {
 			addFailure(e.getTargetException());
@@ -68,20 +69,19 @@ public abstract class BeforeAndAfterRunner {
 		}
 	}
 
-	// Try to run all @Afters regardless
+	//@Afters regardless
 	private void runAfters() {
 		List<Method> afters= testIntrospector.getTestMethods(afterAnnotation);
-		for (Method after : afters)
+		for (Method after : afters) {
 			try {
-				invokeMethod(after);
+				after.invoke(test);
 			} catch (InvocationTargetException e) {
 				addFailure(e.getTargetException());
 			} catch (Throwable e) {
 				addFailure(e); // Untested, but seems impossible
 			}
+		}
+
 	}
-	
-	private void invokeMethod(Method method) throws Exception {
-		method.invoke(test);
-	}
+
 }

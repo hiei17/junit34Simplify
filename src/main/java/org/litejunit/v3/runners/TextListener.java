@@ -1,16 +1,16 @@
 package org.litejunit.v3.runners;
 
-import java.io.PrintStream;
-import java.text.NumberFormat;
-
+import org.litejunit.v3.notification.AbstractRunListener;
 import org.litejunit.v3.notification.Failure;
-import org.litejunit.v3.notification.RunListener;
 import org.litejunit.v3.runner.Description;
 import org.litejunit.v3.runner.Result;
 
+import java.io.PrintStream;
+import java.text.NumberFormat;
 
 
-public class TextListener extends RunListener {
+
+public class TextListener extends AbstractRunListener {
 
 	private final PrintStream writer;
 
@@ -20,6 +20,11 @@ public class TextListener extends RunListener {
 
 	public TextListener(PrintStream writer) {
 		this.writer= writer;
+	}
+
+	@Override
+	public void testRunStarted(Description description) throws Exception {
+
 	}
 
 	@Override
@@ -35,14 +40,16 @@ public class TextListener extends RunListener {
 	}
 
 	@Override
+	public void testFinished(Description description) throws Exception {
+
+	}
+
+	@Override
 	public void testFailure(Failure failure) {
 		writer.append('E');
 	}
 	
-	@Override
-	public void testIgnored(Description description) {
-		writer.append('I');
-	}
+
 	
 	/*
 	 * Internal methods

@@ -35,9 +35,10 @@ public class TestClassMethodsRunner extends Runner  {
 		try {
 			//测试类实例
 			test= createTest();
+
 			Description methodDescription = methodDescription(method);
-			TestMethodRunner testMethodRunner =
-					new TestMethodRunner(test, method, notifier, methodDescription);
+
+			TestMethodRunner testMethodRunner = new TestMethodRunner(test, method, notifier, methodDescription);
 			testMethodRunner.run();
 		} catch (Exception e) {
 			;
@@ -49,7 +50,7 @@ public class TestClassMethodsRunner extends Runner  {
 	//类描述 用于监听的打印
 	@Override
 	public Description getDescription() {
-		Description spec= Description.createSuiteDescription(getName());
+		Description spec= Description.createSuiteDescription(testClass.getName());
 		List<Method> testMethods= this.testMethods;
 		for (Method method : testMethods) {
 			spec.addChild(methodDescription(method));
@@ -57,26 +58,14 @@ public class TestClassMethodsRunner extends Runner  {
 		return spec;
 	}
 
-	protected String getName() {
-		return getTestClass().getName();
-	}
-	
 	protected Object createTest() throws Exception {
-		return getTestClass().getConstructor().newInstance();
+		return testClass.getConstructor().newInstance();
 	}
 
-
-
-	protected String testName(Method method) {
-		return method.getName();
-	}
 
 	protected Description methodDescription(Method method) {
-		return Description.createTestDescription(getTestClass(), testName(method));
+		return Description.createTestDescription(testClass, method.getName());
 	}
 
 
-	protected Class<?> getTestClass() {
-		return testClass;
-	}
 }

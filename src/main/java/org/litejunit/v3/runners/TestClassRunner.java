@@ -9,39 +9,33 @@ import org.litejunit.v3.runner.Runner;
 
 //为了处理@BeforeClass @AfterClass 而存在的 里面包含一个 TestClassMethodsRunner(这个里面才是真的用到测试类
 public class TestClassRunner extends Runner  {
+	//TestClassMethodsRunner
 	protected final Runner enclosedRunner;
 	//测试类
 	private final Class<?> testClass;
 
-	public TestClassRunner(Class<?> klass) throws InitializationError {
-		//todo
-		this(klass, new TestClassMethodsRunner(klass));
-	}
-	
-	public TestClassRunner(Class<?> klass, Runner runner) throws InitializationError {
+	public TestClassRunner(Class<?> klass)  {
 		testClass= klass;
-		enclosedRunner= runner;
-		
+		enclosedRunner= new TestClassMethodsRunner(klass);
 	}
 
-	
 
 	@Override
 	public void run(final RunNotifier notifier) {
-		//为了解决测试类 类前后调用的
+		//为了解决 测试类的 类前后调用的
 		BeforeAndAfterRunner runner = new BeforeAndAfterRunner(
 				testClass,
-				BeforeClass.class,
-				AfterClass.class,
-				null)
-		{
+				BeforeClass.class,//runUnprotected前调用有这个注解的
+				AfterClass.class,//runUnprotected后调用有这个注解的
+				null) {
+
 			//方法主体实现
 			@Override
 			protected void runUnprotected() {
-				//todo  TestClassMethodsRunner
+				//  TestClassMethodsRunner
 				enclosedRunner.run(notifier);
 			}
-		
+
 			// 测试失败调用方法
 			@Override
 			protected void addFailure(Throwable targetException) {
