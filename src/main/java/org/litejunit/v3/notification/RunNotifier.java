@@ -20,25 +20,23 @@ import java.util.List;
 public class RunNotifier {
 	private List<AbstractRunListener> fListeners= new ArrayList<AbstractRunListener>();
 
-	/** Internal use only
-	 */
+
 	public void addListener(AbstractRunListener listener) {
 		fListeners.add(listener);
 	}
 
-	/** Internal use only
-	 */
 	public void removeListener(AbstractRunListener listener) {
 		fListeners.remove(listener);
 	}
 
+	//用于循环的 不同循环内容
 	//内部抽象类 模板
 	private abstract class AbstractSafeNotifier {
 		void run() {
 			for (Iterator<AbstractRunListener> allListeners = fListeners.iterator(); allListeners.hasNext();) {
 
 				try {
-					//关键
+					//panda 关键
 					notifyListener(allListeners.next());
 				} catch (Exception e) {
 					// Remove the offending listener first to avoid an infinite loop
@@ -49,7 +47,7 @@ public class RunNotifier {
 
 			}
 		}
-		//等子类自由实现
+		//panda 等子类自由实现
 		abstract protected void notifyListener(AbstractRunListener each) throws Exception;
 	}
 	

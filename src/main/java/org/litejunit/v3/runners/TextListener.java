@@ -6,21 +6,13 @@ import org.litejunit.v3.runner.Description;
 import org.litejunit.v3.runner.Result;
 
 import java.io.PrintStream;
-import java.text.NumberFormat;
 
 
 
 public class TextListener extends AbstractRunListener {
 
-	private final PrintStream writer;
+	private final PrintStream writer=System.out;
 
-	public TextListener() {
-		this(System.out);
-	}
-
-	public TextListener(PrintStream writer) {
-		this.writer= writer;
-	}
 
 	@Override
 	public void testRunStarted(Description description) throws Exception {
@@ -29,7 +21,8 @@ public class TextListener extends AbstractRunListener {
 
 	@Override
 	public void testRunFinished(Result result) {
-		printHeader(result.getRunTime());
+		writer.println();
+		writer.println("Time: " + result.getRunTime() / 1000 );
 		printFailures(result);
 		printFooter(result);
 	}
@@ -55,59 +48,33 @@ public class TextListener extends AbstractRunListener {
 	 * Internal methods
 	 */
 
-	private PrintStream getWriter() {
-		return writer;
-	}
-
-	protected void printHeader(long runTime) {
-		getWriter().println();
-		getWriter().println("Time: " + elapsedTimeAsString(runTime));
-	}
-
 	protected void printFailures(Result result) {
 		if (result.getFailureCount() == 0)
 			return;
-		if (result.getFailureCount() == 1)
-			getWriter().println("There was " + result.getFailureCount() + " failure:");
-		else
-			getWriter().println("There were " + result.getFailureCount() + " failures:");
+
+		writer.println( result.getFailureCount() + " failure:");
+
+
 		int i= 1;
-		for (Failure each : result.getFailures())
-			printFailure(each, i++);
-	}
-
-	protected void printFailure(Failure failure, int count) {
-		printFailureHeader(failure, count);
-		printFailureTrace(failure);
-	}
-
-	protected void printFailureHeader(Failure failure, int count) {
-		getWriter().println(count + ") " + failure.getTestHeader());
-	}
-
-	protected void printFailureTrace(Failure failure) {
-		getWriter().print(failure.getTrace());
+		for (Failure each : result.getFailures()) {
+			int count = i++;
+			writer.println(count + ") " + each.getTestHeader());
+			writer.print(each.getTrace());
+		}
 	}
 
 	protected void printFooter(Result result) {
 		if (result.wasSuccessful()) {
-			getWriter().println();
-			getWriter().print("OK");
-			getWriter().println(" (" + result.getRunCount() + " test" + (result.getRunCount() == 1 ? "" : "s") + ")");
+			writer.println();
+			writer.print("OK");
+			writer.println(" (" + result.getRunCount() + " test" + (result.getRunCount() == 1 ? "" : "s") + ")");
 
 		} else {
-			getWriter().println();
-			getWriter().println("FAILURES!!!");
-			getWriter().println("Tests run: " + result.getRunCount() + ",  Failures: " + result.getFailureCount());
+			writer.println();
+			writer.println("FAILURES!!!");
+			writer.println("Tests run: " + result.getRunCount() + ",  Failures: " + result.getFailureCount());
 		}
-		getWriter().println();
+		writer.println();
 	}
 
-	/**
-	 * Returns the formatted string of the elapsed time. Duplicated from
-	 * BaseTestRunner. Fix it.
-	 */
-	protected String elapsedTimeAsString(long runTime) {
-		return NumberFormat.getInstance().format((double) runTime / 1000);
-	}
 }
